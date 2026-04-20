@@ -1,0 +1,45 @@
+name: Daily Content Generation
+
+on:
+  schedule:
+    - cron: '0 1 * * *'  # 08:00 WIB (UTC+7 = 01:00 UTC)
+  workflow_dispatch:      # allows manual trigger from GitHub Actions tab
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write     # needed to push generated images + log back to repo
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install anthropic fal-client requests google-auth google-auth-httplib2 google-api-python-client python-dotenv Pillow
+
+      - name: Install fonts
+        run: |
+          sudo apt-get install -y fonts-google-fonts 2>/dev/null || true
+          fc-cache -f -v
+
+      - name: Run pipeline
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FAL_API_KEY: ${{ secrets.FAL_API_KEY }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd $GITHUB_WORKSPACE
+          git config user.name "ratih-bot"
+          git config user.email "ratih-bot@users.noreply.github.com"
+          python3 scripts/generate_content.py
