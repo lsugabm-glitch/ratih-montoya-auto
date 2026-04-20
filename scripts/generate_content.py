@@ -100,55 +100,47 @@ def wrap_text(text, font, max_width, draw):
 
 # -- Slide renderers -----------------------------------------------------------
 
+def draw_outlined_text(draw, pos, text, font, fill="white", outline="black", stroke=6):
+    """Draw text with solid black outline -- TikTok style."""
+    x, y = pos
+    for dx in range(-stroke, stroke + 1):
+        for dy in range(-stroke, stroke + 1):
+            if dx == 0 and dy == 0:
+                continue
+            draw.text((x + dx, y + dy), text, font=font, fill=outline, anchor="ls")
+    draw.text((x, y), text, font=font, fill=fill, anchor="ls")
+
+
 def inject_text_overlay(image_path, overlay_text, output_path):
     """
-    Inject multi-line text overlay onto a generated Flux image.
-    Text sits bottom-left with a gradient shadow for legibility.
+    TikTok-style text overlay: bold white text + black outline.
+    No gradient. Text bottom-left, readable on any background.
     """
     from PIL import Image, ImageDraw
 
     img = Image.open(image_path).convert("RGB")
     iw, ih = img.size
-
-    overlay = Image.new("RGBA", (iw, ih), (0, 0, 0, 0))
-    draw_ov = ImageDraw.Draw(overlay)
-
-    # Gradient shadow: transparent to black, bottom 45% of image
-    shadow_h = int(ih * 0.45)
-    for i in range(shadow_h):
-        alpha = int(200 * (i / shadow_h) ** 1.6)
-        draw_ov.rectangle(
-            [(0, ih - shadow_h + i), (iw, ih - shadow_h + i + 1)],
-            fill=(0, 0, 0, alpha)
-        )
-
-    img = img.convert("RGBA")
-    img = Image.alpha_composite(img, overlay).convert("RGB")
     draw = ImageDraw.Draw(img)
 
     lines = overlay_text.strip().split("\n")
     padding = int(iw * 0.07)
-    y = ih - int(ih * 0.06)
+    y = ih - int(ih * 0.07)
 
-    # Draw lines bottom-up
     for idx, line in enumerate(reversed(lines)):
         if not line.strip():
-            y -= 12
+            y -= 20
             continue
-        # First line (label/date) gets smaller font
         is_label = (len(lines) - 1 - idx == 0) and len(lines) > 1 and len(line) < 25
-        size = int(iw * 0.040) if is_label else int(iw * 0.056)
-        font = load_font(SANS_PATHS, size)
+        size = int(iw * 0.042) if is_label else int(iw * 0.065)
+        font = load_font(SANS_BOLD_PATHS, size)
+        stroke = max(4, size // 14)
 
-        # Shadow pass
-        draw.text((padding + 3, y - 3), line, font=font,
-                  fill=(0, 0, 0, 180), anchor="ls")
-        # Main text
-        draw.text((padding, y), line, font=font, fill="white", anchor="ls")
+        draw_outlined_text(draw, (padding, y), line, font,
+                           fill="white", outline="black", stroke=stroke)
 
         bbox = draw.textbbox((0, 0), line, font=font)
         line_h = bbox[3] - bbox[1]
-        y -= line_h + int(line_h * 0.28)
+        y -= line_h + int(line_h * 0.22)
 
     img.save(str(output_path), "JPEG", quality=95)
     print(f"  + Text overlay injected: {output_path.name}")
