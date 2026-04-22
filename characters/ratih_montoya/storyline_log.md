@@ -9,3 +9,4 @@ Format: [DATE] | [EPISODE TITLE] | [ONE SENTENCE SUMMARY]
 2026-04-06 | Things I Stopped Apologizing For | Ratih names three concrete things she's stopped apologizing for, showing her rebuilding through specific everyday moments of reclaiming space.
 2026-04-20 | The Red Lipstick Truth | Ratih reveals how her red lipstick collection represents the slow process of remembering who she was before she learned to make herself smaller
 2026-04-21 | The Restaurant Table Truth | Ratih shares the specific shift when eating alone stopped feeling like something to endure and became something she chose — a quiet marker of actually enjoying her own company
+2026-04-22 | The Sunday Morning Standard | Ratih reveals how her Sunday flower ritual became an accidental standard for self-worth — showing that rebuilding happens through small consistent acts, not grand gestures
